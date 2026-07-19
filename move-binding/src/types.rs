@@ -1,8 +1,13 @@
 use crate::move_codegen::BINDING_REGISTRY;
+use crate::normalized::Type;
 use itertools::Itertools;
-use move_binary_format::normalized::Type;
-use move_core_types::account_address::AccountAddress;
-use move_core_types::identifier::Identifier;
+use sui_sdk_types::Address;
+
+pub const MOVE_STDLIB: Address = {
+    let mut address = [0u8; 32];
+    address[31] = 1;
+    Address::new(address)
+};
 
 pub trait ToRustType {
     fn to_rust_type(&self) -> String;
@@ -10,7 +15,7 @@ pub trait ToRustType {
     fn to_arg_type(&self) -> String;
 }
 
-impl ToRustType for Type<Identifier> {
+impl ToRustType for Type {
     fn to_rust_type(&self) -> String {
         match self {
             Self::Bool => "bool".to_string(),
@@ -51,23 +56,23 @@ impl ToRustType for Type<Identifier> {
     }
 }
 
-fn try_resolve_known_types(_type: &Type<Identifier>) -> String {
+fn try_resolve_known_types(_type: &Type) -> String {
     if let Type::Datatype(datatype) = _type {
-        let address = &datatype.module.address;
-        let module = datatype.module.name.as_str();
+        let address = &datatype.address;
+        let module = datatype.module.as_str();
         let name = datatype.name.as_str();
         let type_arguments = &datatype.type_arguments;
 
         match (address, module, name) {
-            (&AccountAddress::ONE, "type_name", "TypeName") => "String".to_string(),
-            (&AccountAddress::ONE, "string", "String") => "String".to_string(),
-            (&AccountAddress::ONE, "ascii", "String") => "String".to_string(),
-            (&AccountAddress::ONE, "option", "Option") => {
+            (&MOVE_STDLIB, "type_name", "TypeName") => "String".to_string(),
+            (&MOVE_STDLIB, "string", "String") => "String".to_string(),
+            (&MOVE_STDLIB, "ascii", "String") => "String".to_string(),
+            (&MOVE_STDLIB, "option", "Option") => {
                 format!("Option<{}>", type_arguments[0].to_rust_type())
             }
 
-            (&AccountAddress::TWO, "object", "UID") => "ObjectId".to_string(),
-            (&AccountAddress::TWO, "object", "ID") => "ObjectId".to_string(),
+            (&Address::TWO, "object", "UID") => "ObjectId".to_string(),
+            (&Address::TWO, "object", "ID") => "ObjectId".to_string(),
             _ => {
                 let cache = BINDING_REGISTRY.read().unwrap();
 

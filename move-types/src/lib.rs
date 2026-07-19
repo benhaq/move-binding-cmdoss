@@ -1,6 +1,5 @@
 pub mod functions;
 
-pub use move_core_types::u256::U256;
 use serde::Deserialize;
 use serde::Serialize;
 use std::fmt;
@@ -9,6 +8,7 @@ pub use sui_sdk_types::Address;
 pub use sui_sdk_types::Identifier;
 pub use sui_sdk_types::StructTag;
 pub use sui_sdk_types::TypeTag;
+pub use sui_sdk_types::U256;
 
 // ObjectId is now just an Address in sui-sdk-types, but we wrap it in a newtype
 // to maintain the correct MoveType implementation (0x2::object::UID)

@@ -1,10 +1,9 @@
 ---
 source: move-binding/tests/snapshot_tests.rs
-assertion_line: 28
 expression: pretty
 ---
 pub mod bridge {
-    pub const PACKAGE_VERSION: u64 = 7u64;
+    pub const PACKAGE_VERSION: u64 = 8u64;
     pub mod bridge {
         use std::str::FromStr;
         use move_binding_derive::{MoveStruct, Key};
@@ -51,6 +50,30 @@ pub mod bridge {
             ]);
         }
         #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
+        pub struct BridgeRecord {
+            pub message: crate::bridge::message::BridgeMessage,
+            pub verified_signatures: Option<Vec<Vec<u8>>>,
+            pub claimed: bool,
+        }
+        impl BridgeRecord {
+            pub const TYPE_ORIGIN_ID: Address = Address::new([
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 11u8,
+            ]);
+        }
+        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
+        pub struct EmergencyOpEvent {
+            pub frozen: bool,
+        }
+        impl EmergencyOpEvent {
+            pub const TYPE_ORIGIN_ID: Address = Address::new([
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 11u8,
+            ]);
+        }
+        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
         pub struct TokenDepositedEvent {
             pub seq_num: u64,
             pub source_chain: u8,
@@ -86,10 +109,10 @@ pub mod bridge {
             ]);
         }
         #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct EmergencyOpEvent {
-            pub frozen: bool,
+        pub struct TokenTransferAlreadyApproved {
+            pub message_key: crate::bridge::message::BridgeMessageKey,
         }
-        impl EmergencyOpEvent {
+        impl TokenTransferAlreadyApproved {
             pub const TYPE_ORIGIN_ID: Address = Address::new([
                 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
                 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
@@ -97,12 +120,10 @@ pub mod bridge {
             ]);
         }
         #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct BridgeRecord {
-            pub message: crate::bridge::message::BridgeMessage,
-            pub verified_signatures: Option<Vec<Vec<u8>>>,
-            pub claimed: bool,
+        pub struct TokenTransferAlreadyClaimed {
+            pub message_key: crate::bridge::message::BridgeMessageKey,
         }
-        impl BridgeRecord {
+        impl TokenTransferAlreadyClaimed {
             pub const TYPE_ORIGIN_ID: Address = Address::new([
                 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
                 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
@@ -132,28 +153,6 @@ pub mod bridge {
             ]);
         }
         #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct TokenTransferAlreadyApproved {
-            pub message_key: crate::bridge::message::BridgeMessageKey,
-        }
-        impl TokenTransferAlreadyApproved {
-            pub const TYPE_ORIGIN_ID: Address = Address::new([
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 11u8,
-            ]);
-        }
-        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct TokenTransferAlreadyClaimed {
-            pub message_key: crate::bridge::message::BridgeMessageKey,
-        }
-        impl TokenTransferAlreadyClaimed {
-            pub const TYPE_ORIGIN_ID: Address = Address::new([
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 11u8,
-            ]);
-        }
-        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
         pub struct TokenTransferLimitExceed {
             pub message_key: crate::bridge::message::BridgeMessageKey,
         }
@@ -163,152 +162,6 @@ pub mod bridge {
                 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
                 0u8, 0u8, 0u8, 11u8,
             ]);
-        }
-        pub fn create<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Arg<ObjectId>,
-            p1: Arg<u8>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("create").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into()],
-                );
-        }
-        pub fn init_bridge_committee<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
-            p1: Arg<crate::sui::vec_map::VecMap<Address, u64>>,
-            p2: Arg<u64>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("init_bridge_committee").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into(), p2.into()],
-                );
-        }
-        pub fn committee_registration<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
-            p1: MutRef<'a, crate::sui_system::sui_system::SuiSystemState>,
-            p2: Arg<Vec<u8>>,
-            p3: Arg<Vec<u8>>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            let p3 = p3.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("committee_registration").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into(), p2.into(), p3.into()],
-                );
-        }
-        pub fn update_node_url<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
-            p1: Arg<Vec<u8>>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("update_node_url").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into()],
-                );
-        }
-        pub fn register_foreign_token<'a, T0: MoveType>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
-            p1: Arg<crate::sui::coin::TreasuryCap<T0>>,
-            p2: Arg<crate::sui::package::UpgradeCap>,
-            p3: Ref<'a, crate::sui::coin::CoinMetadata<T0>>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            let p3 = p3.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("register_foreign_token").unwrap(),
-                        )
-                        .with_type_args(vec![T0::type_()]),
-                    vec![p0.into(), p1.into(), p2.into(), p3.into()],
-                );
-        }
-        pub fn send_token<'a, T0: MoveType>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
-            p1: Arg<u8>,
-            p2: Arg<Vec<u8>>,
-            p3: Arg<crate::sui::coin::Coin<T0>>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            let p3 = p3.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("send_token").unwrap(),
-                        )
-                        .with_type_args(vec![T0::type_()]),
-                    vec![p0.into(), p1.into(), p2.into(), p3.into()],
-                );
-        }
-        pub fn send_token_v2<'a, T0: MoveType>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
-            p1: Arg<u8>,
-            p2: Arg<Vec<u8>>,
-            p3: Arg<crate::sui::coin::Coin<T0>>,
-            p4: Ref<'a, crate::sui::clock::Clock>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            let p3 = p3.resolve_arg(builder);
-            let p4 = p4.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("send_token_v2").unwrap(),
-                        )
-                        .with_type_args(vec![T0::type_()]),
-                    vec![p0.into(), p1.into(), p2.into(), p3.into(), p4.into()],
-                );
         }
         pub fn approve_token_transfer<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
@@ -329,29 +182,6 @@ pub mod bridge {
                         .with_type_args(vec![]),
                     vec![p0.into(), p1.into(), p2.into()],
                 );
-        }
-        pub fn claim_token<'a, T0: MoveType>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
-            p1: Ref<'a, crate::sui::clock::Clock>,
-            p2: Arg<u8>,
-            p3: Arg<u64>,
-        ) -> Arg<crate::sui::coin::Coin<T0>> {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            let p3 = p3.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("claim_token").unwrap(),
-                        )
-                        .with_type_args(vec![T0::type_()]),
-                    vec![p0.into(), p1.into(), p2.into(), p3.into()],
-                )
-                .into()
         }
         pub fn claim_and_transfer_token<'a, T0: MoveType>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
@@ -375,101 +205,26 @@ pub mod bridge {
                     vec![p0.into(), p1.into(), p2.into(), p3.into()],
                 );
         }
-        pub fn execute_system_message<'a>(
+        pub fn claim_token<'a, T0: MoveType>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
             p0: MutRef<'a, crate::bridge::bridge::Bridge>,
-            p1: Arg<crate::bridge::message::BridgeMessage>,
-            p2: Arg<Vec<Vec<u8>>>,
-        ) {
+            p1: Ref<'a, crate::sui::clock::Clock>,
+            p2: Arg<u8>,
+            p3: Arg<u64>,
+        ) -> Arg<crate::sui::coin::Coin<T0>> {
             let p0 = p0.resolve_arg(builder);
             let p1 = p1.resolve_arg(builder);
             let p2 = p2.resolve_arg(builder);
+            let p3 = p3.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("execute_system_message").unwrap(),
+                            Identifier::from_str("claim_token").unwrap(),
                         )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into(), p2.into()],
-                );
-        }
-        pub fn get_token_transfer_action_status<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::bridge::Bridge>,
-            p1: Arg<u8>,
-            p2: Arg<u64>,
-        ) -> Arg<u8> {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("get_token_transfer_action_status")
-                                .unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into(), p2.into()],
-                )
-                .into()
-        }
-        pub fn get_token_transfer_action_signatures<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::bridge::Bridge>,
-            p1: Arg<u8>,
-            p2: Arg<u64>,
-        ) -> Arg<Option<Vec<Vec<u8>>>> {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("get_token_transfer_action_signatures")
-                                .unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into(), p2.into()],
-                )
-                .into()
-        }
-        pub fn load_inner<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::bridge::Bridge>,
-        ) -> Ref<'a, crate::bridge::bridge::BridgeInner> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("load_inner").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn load_inner_mut<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
-        ) -> MutRef<'a, crate::bridge::bridge::BridgeInner> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("load_inner_mut").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
+                        .with_type_args(vec![T0::type_()]),
+                    vec![p0.into(), p1.into(), p2.into(), p3.into()],
                 )
                 .into()
         }
@@ -496,12 +251,12 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn send_token_internal<'a, T0: MoveType>(
+        pub fn committee_registration<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::bridge::BridgeInner>,
-            p1: Arg<u8>,
-            p2: Arg<crate::sui::coin::Coin<T0>>,
-            p3: Arg<crate::bridge::message::BridgeMessage>,
+            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
+            p1: MutRef<'a, crate::sui_system::sui_system::SuiSystemState>,
+            p2: Arg<Vec<u8>>,
+            p3: Arg<Vec<u8>>,
         ) {
             let p0 = p0.resolve_arg(builder);
             let p1 = p1.resolve_arg(builder);
@@ -512,10 +267,46 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("send_token_internal").unwrap(),
+                            Identifier::from_str("committee_registration").unwrap(),
                         )
-                        .with_type_args(vec![T0::type_()]),
+                        .with_type_args(vec![]),
                     vec![p0.into(), p1.into(), p2.into(), p3.into()],
+                );
+        }
+        pub fn create<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Arg<ObjectId>,
+            p1: Arg<u8>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("create").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into(), p1.into()],
+                );
+        }
+        pub fn execute_add_tokens_on_sui<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::bridge::bridge::BridgeInner>,
+            p1: Arg<crate::bridge::message::AddTokenOnSui>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("execute_add_tokens_on_sui").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into(), p1.into()],
                 );
         }
         pub fn execute_emergency_op<'a>(
@@ -536,22 +327,24 @@ pub mod bridge {
                     vec![p0.into(), p1.into()],
                 );
         }
-        pub fn execute_update_bridge_limit<'a>(
+        pub fn execute_system_message<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::bridge::BridgeInner>,
-            p1: Arg<crate::bridge::message::UpdateBridgeLimit>,
+            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
+            p1: Arg<crate::bridge::message::BridgeMessage>,
+            p2: Arg<Vec<Vec<u8>>>,
         ) {
             let p0 = p0.resolve_arg(builder);
             let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("execute_update_bridge_limit").unwrap(),
+                            Identifier::from_str("execute_system_message").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![p0.into(), p1.into()],
+                    vec![p0.into(), p1.into(), p2.into()],
                 );
         }
         pub fn execute_update_asset_price<'a>(
@@ -572,10 +365,10 @@ pub mod bridge {
                     vec![p0.into(), p1.into()],
                 );
         }
-        pub fn execute_add_tokens_on_sui<'a>(
+        pub fn execute_update_bridge_limit<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
             p0: MutRef<'a, crate::bridge::bridge::BridgeInner>,
-            p1: Arg<crate::bridge::message::AddTokenOnSui>,
+            p1: Arg<crate::bridge::message::UpdateBridgeLimit>,
         ) {
             let p0 = p0.resolve_arg(builder);
             let p1 = p1.resolve_arg(builder);
@@ -584,7 +377,7 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("execute_add_tokens_on_sui").unwrap(),
+                            Identifier::from_str("execute_update_bridge_limit").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![p0.into(), p1.into()],
@@ -632,6 +425,212 @@ pub mod bridge {
                 )
                 .into()
         }
+        pub fn get_token_transfer_action_signatures<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::bridge::Bridge>,
+            p1: Arg<u8>,
+            p2: Arg<u64>,
+        ) -> Arg<Option<Vec<Vec<u8>>>> {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("get_token_transfer_action_signatures")
+                                .unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into(), p1.into(), p2.into()],
+                )
+                .into()
+        }
+        pub fn get_token_transfer_action_status<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::bridge::Bridge>,
+            p1: Arg<u8>,
+            p2: Arg<u64>,
+        ) -> Arg<u8> {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("get_token_transfer_action_status")
+                                .unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into(), p1.into(), p2.into()],
+                )
+                .into()
+        }
+        pub fn init_bridge_committee<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
+            p1: Arg<crate::sui::vec_map::VecMap<Address, u64>>,
+            p2: Arg<u64>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("init_bridge_committee").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into(), p1.into(), p2.into()],
+                );
+        }
+        pub fn load_inner<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::bridge::Bridge>,
+        ) -> Ref<'a, crate::bridge::bridge::BridgeInner> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("load_inner").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn load_inner_mut<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
+        ) -> MutRef<'a, crate::bridge::bridge::BridgeInner> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("load_inner_mut").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn register_foreign_token<'a, T0: MoveType>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
+            p1: Arg<crate::sui::coin::TreasuryCap<T0>>,
+            p2: Arg<crate::sui::package::UpgradeCap>,
+            p3: Ref<'a, crate::sui::coin::CoinMetadata<T0>>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
+            let p3 = p3.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("register_foreign_token").unwrap(),
+                        )
+                        .with_type_args(vec![T0::type_()]),
+                    vec![p0.into(), p1.into(), p2.into(), p3.into()],
+                );
+        }
+        pub fn send_token<'a, T0: MoveType>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
+            p1: Arg<u8>,
+            p2: Arg<Vec<u8>>,
+            p3: Arg<crate::sui::coin::Coin<T0>>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
+            let p3 = p3.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("send_token").unwrap(),
+                        )
+                        .with_type_args(vec![T0::type_()]),
+                    vec![p0.into(), p1.into(), p2.into(), p3.into()],
+                );
+        }
+        pub fn send_token_internal<'a, T0: MoveType>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::bridge::bridge::BridgeInner>,
+            p1: Arg<u8>,
+            p2: Arg<crate::sui::coin::Coin<T0>>,
+            p3: Arg<crate::bridge::message::BridgeMessage>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
+            let p3 = p3.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("send_token_internal").unwrap(),
+                        )
+                        .with_type_args(vec![T0::type_()]),
+                    vec![p0.into(), p1.into(), p2.into(), p3.into()],
+                );
+        }
+        pub fn send_token_v2<'a, T0: MoveType>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
+            p1: Arg<u8>,
+            p2: Arg<Vec<u8>>,
+            p3: Arg<crate::sui::coin::Coin<T0>>,
+            p4: Ref<'a, crate::sui::clock::Clock>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
+            let p3 = p3.resolve_arg(builder);
+            let p4 = p4.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("send_token_v2").unwrap(),
+                        )
+                        .with_type_args(vec![T0::type_()]),
+                    vec![p0.into(), p1.into(), p2.into(), p3.into(), p4.into()],
+                );
+        }
+        pub fn update_node_url<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::bridge::bridge::Bridge>,
+            p1: Arg<Vec<u8>>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("update_node_url").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into(), p1.into()],
+                );
+        }
     }
     pub mod chain_ids {
         use std::str::FromStr;
@@ -656,22 +655,23 @@ pub mod bridge {
                 0u8, 0u8, 0u8, 11u8,
             ]);
         }
-        pub fn sui_mainnet(
+        pub fn assert_valid_chain_id(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-        ) -> Arg<u8> {
+            p0: Arg<u8>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("sui_mainnet").unwrap(),
+                            Identifier::from_str("assert_valid_chain_id").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![],
-                )
-                .into()
+                    vec![p0.into()],
+                );
         }
-        pub fn sui_testnet(
+        pub fn eth_custom(
             builder: &mut sui_transaction_builder::TransactionBuilder,
         ) -> Arg<u8> {
             builder
@@ -679,22 +679,7 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("sui_testnet").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![],
-                )
-                .into()
-        }
-        pub fn sui_custom(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-        ) -> Arg<u8> {
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("sui_custom").unwrap(),
+                            Identifier::from_str("eth_custom").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![],
@@ -731,83 +716,22 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn eth_custom(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-        ) -> Arg<u8> {
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("eth_custom").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![],
-                )
-                .into()
-        }
-        pub fn route_source<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::chain_ids::BridgeRoute>,
-        ) -> Ref<'a, u8> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("route_source").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn route_destination<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::chain_ids::BridgeRoute>,
-        ) -> Ref<'a, u8> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("route_destination").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn assert_valid_chain_id(
+        pub fn get_route(
             builder: &mut sui_transaction_builder::TransactionBuilder,
             p0: Arg<u8>,
-        ) {
+            p1: Arg<u8>,
+        ) -> Arg<crate::bridge::chain_ids::BridgeRoute> {
             let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("assert_valid_chain_id").unwrap(),
+                            Identifier::from_str("get_route").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![p0.into()],
-                );
-        }
-        pub fn valid_routes(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-        ) -> Arg<Vec<crate::bridge::chain_ids::BridgeRoute>> {
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("valid_routes").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![],
+                    vec![p0.into(), p1.into()],
                 )
                 .into()
         }
@@ -830,22 +754,97 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn get_route(
+        pub fn route_destination<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Arg<u8>,
-            p1: Arg<u8>,
-        ) -> Arg<crate::bridge::chain_ids::BridgeRoute> {
+            p0: Ref<'a, crate::bridge::chain_ids::BridgeRoute>,
+        ) -> Ref<'a, u8> {
             let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("get_route").unwrap(),
+                            Identifier::from_str("route_destination").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![p0.into(), p1.into()],
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn route_source<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::chain_ids::BridgeRoute>,
+        ) -> Ref<'a, u8> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("route_source").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn sui_custom(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+        ) -> Arg<u8> {
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("sui_custom").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![],
+                )
+                .into()
+        }
+        pub fn sui_mainnet(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+        ) -> Arg<u8> {
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("sui_mainnet").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![],
+                )
+                .into()
+        }
+        pub fn sui_testnet(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+        ) -> Arg<u8> {
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("sui_testnet").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![],
+                )
+                .into()
+        }
+        pub fn valid_routes(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+        ) -> Arg<Vec<crate::bridge::chain_ids::BridgeRoute>> {
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("valid_routes").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![],
                 )
                 .into()
         }
@@ -893,33 +892,6 @@ pub mod bridge {
             ]);
         }
         #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct CommitteeUpdateEvent {
-            pub members: crate::sui::vec_map::VecMap<
-                Vec<u8>,
-                crate::bridge::committee::CommitteeMember,
-            >,
-            pub stake_participation_percentage: u64,
-        }
-        impl CommitteeUpdateEvent {
-            pub const TYPE_ORIGIN_ID: Address = Address::new([
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 11u8,
-            ]);
-        }
-        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct CommitteeMemberUrlUpdateEvent {
-            pub member: Vec<u8>,
-            pub new_url: Vec<u8>,
-        }
-        impl CommitteeMemberUrlUpdateEvent {
-            pub const TYPE_ORIGIN_ID: Address = Address::new([
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 11u8,
-            ]);
-        }
-        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
         pub struct CommitteeMember {
             pub sui_address: Address,
             pub bridge_pubkey_bytes: Vec<u8>,
@@ -947,25 +919,73 @@ pub mod bridge {
                 0u8, 0u8, 0u8, 11u8,
             ]);
         }
-        pub fn verify_signatures<'a>(
+        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
+        pub struct CommitteeMemberUrlUpdateEvent {
+            pub member: Vec<u8>,
+            pub new_url: Vec<u8>,
+        }
+        impl CommitteeMemberUrlUpdateEvent {
+            pub const TYPE_ORIGIN_ID: Address = Address::new([
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 11u8,
+            ]);
+        }
+        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
+        pub struct CommitteeUpdateEvent {
+            pub members: crate::sui::vec_map::VecMap<
+                Vec<u8>,
+                crate::bridge::committee::CommitteeMember,
+            >,
+            pub stake_participation_percentage: u64,
+        }
+        impl CommitteeUpdateEvent {
+            pub const TYPE_ORIGIN_ID: Address = Address::new([
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 11u8,
+            ]);
+        }
+        pub fn check_uniqueness_bridge_keys<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
             p0: Ref<'a, crate::bridge::committee::BridgeCommittee>,
-            p1: Arg<crate::bridge::message::BridgeMessage>,
-            p2: Arg<Vec<Vec<u8>>>,
+            p1: Arg<Vec<u8>>,
         ) {
             let p0 = p0.resolve_arg(builder);
             let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("verify_signatures").unwrap(),
+                            Identifier::from_str("check_uniqueness_bridge_keys").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![p0.into(), p1.into(), p2.into()],
+                    vec![p0.into(), p1.into()],
                 );
+        }
+        pub fn committee_members<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::committee::BridgeCommittee>,
+        ) -> Ref<
+            'a,
+            crate::sui::vec_map::VecMap<
+                Vec<u8>,
+                crate::bridge::committee::CommitteeMember,
+            >,
+        > {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("committee_members").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
         }
         pub fn create<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
@@ -981,6 +1001,24 @@ pub mod bridge {
                     vec![],
                 )
                 .into()
+        }
+        pub fn execute_blocklist<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::bridge::committee::BridgeCommittee>,
+            p1: Arg<crate::bridge::message::Blocklist>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("execute_blocklist").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into(), p1.into()],
+                );
         }
         pub fn register<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
@@ -1024,47 +1062,6 @@ pub mod bridge {
                     vec![p0.into(), p1.into(), p2.into()],
                 );
         }
-        pub fn execute_blocklist<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::committee::BridgeCommittee>,
-            p1: Arg<crate::bridge::message::Blocklist>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("execute_blocklist").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into()],
-                );
-        }
-        pub fn committee_members<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::committee::BridgeCommittee>,
-        ) -> Ref<
-            'a,
-            crate::sui::vec_map::VecMap<
-                Vec<u8>,
-                crate::bridge::committee::CommitteeMember,
-            >,
-        > {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("committee_members").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
         pub fn update_node_url<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
             p0: MutRef<'a, crate::bridge::committee::BridgeCommittee>,
@@ -1083,22 +1080,24 @@ pub mod bridge {
                     vec![p0.into(), p1.into()],
                 );
         }
-        pub fn check_uniqueness_bridge_keys<'a>(
+        pub fn verify_signatures<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
             p0: Ref<'a, crate::bridge::committee::BridgeCommittee>,
-            p1: Arg<Vec<u8>>,
+            p1: Arg<crate::bridge::message::BridgeMessage>,
+            p2: Arg<Vec<Vec<u8>>>,
         ) {
             let p0 = p0.resolve_arg(builder);
             let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("check_uniqueness_bridge_keys").unwrap(),
+                            Identifier::from_str("verify_signatures").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![p0.into(), p1.into()],
+                    vec![p0.into(), p1.into(), p2.into()],
                 );
         }
     }
@@ -1187,11 +1186,11 @@ pub mod bridge {
                 0u8, 0u8, 0u8, 11u8,
             ]);
         }
-        pub fn get_route_limit<'a>(
+        pub fn adjust_transfer_records<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::limiter::TransferLimiter>,
-            p1: Ref<'a, crate::bridge::chain_ids::BridgeRoute>,
-        ) -> Arg<u64> {
+            p0: MutRef<'a, crate::bridge::limiter::TransferRecord>,
+            p1: Arg<u64>,
+        ) {
             let p0 = p0.resolve_arg(builder);
             let p1 = p1.resolve_arg(builder);
             builder
@@ -1199,27 +1198,11 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("get_route_limit").unwrap(),
+                            Identifier::from_str("adjust_transfer_records").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![p0.into(), p1.into()],
-                )
-                .into()
-        }
-        pub fn new(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-        ) -> Arg<crate::bridge::limiter::TransferLimiter> {
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("new").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![],
-                )
-                .into()
+                );
         }
         pub fn check_and_record_sending_transfer<'a, T0: MoveType>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
@@ -1247,6 +1230,74 @@ pub mod bridge {
                 )
                 .into()
         }
+        pub fn current_hour_since_epoch<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::sui::clock::Clock>,
+        ) -> Arg<u64> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("current_hour_since_epoch").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn get_route_limit<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::limiter::TransferLimiter>,
+            p1: Ref<'a, crate::bridge::chain_ids::BridgeRoute>,
+        ) -> Arg<u64> {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("get_route_limit").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into(), p1.into()],
+                )
+                .into()
+        }
+        pub fn initial_transfer_limits(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+        ) -> Arg<
+            crate::sui::vec_map::VecMap<crate::bridge::chain_ids::BridgeRoute, u64>,
+        > {
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("initial_transfer_limits").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![],
+                )
+                .into()
+        }
+        pub fn new(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+        ) -> Arg<crate::bridge::limiter::TransferLimiter> {
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("new").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![],
+                )
+                .into()
+        }
         pub fn update_route_limit<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
             p0: MutRef<'a, crate::bridge::limiter::TransferLimiter>,
@@ -1267,58 +1318,6 @@ pub mod bridge {
                     vec![p0.into(), p1.into(), p2.into()],
                 );
         }
-        pub fn current_hour_since_epoch<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::sui::clock::Clock>,
-        ) -> Arg<u64> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("current_hour_since_epoch").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn adjust_transfer_records<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::limiter::TransferRecord>,
-            p1: Arg<u64>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("adjust_transfer_records").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into()],
-                );
-        }
-        pub fn initial_transfer_limits(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-        ) -> Arg<
-            crate::sui::vec_map::VecMap<crate::bridge::chain_ids::BridgeRoute, u64>,
-        > {
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("initial_transfer_limits").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![],
-                )
-                .into()
-        }
     }
     pub mod message {
         use std::str::FromStr;
@@ -1331,6 +1330,32 @@ pub mod bridge {
             0u8, 11u8,
         ]);
         pub const MODULE_NAME: &str = "message";
+        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
+        pub struct AddTokenOnSui {
+            pub native_token: bool,
+            pub token_ids: Vec<u8>,
+            pub token_type_names: Vec<String>,
+            pub token_prices: Vec<u64>,
+        }
+        impl AddTokenOnSui {
+            pub const TYPE_ORIGIN_ID: Address = Address::new([
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 11u8,
+            ]);
+        }
+        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
+        pub struct Blocklist {
+            pub blocklist_type: u8,
+            pub validator_eth_addresses: Vec<Vec<u8>>,
+        }
+        impl Blocklist {
+            pub const TYPE_ORIGIN_ID: Address = Address::new([
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 11u8,
+            ]);
+        }
         #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
         pub struct BridgeMessage {
             pub message_type: u8,
@@ -1353,6 +1378,32 @@ pub mod bridge {
             pub bridge_seq_num: u64,
         }
         impl BridgeMessageKey {
+            pub const TYPE_ORIGIN_ID: Address = Address::new([
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 11u8,
+            ]);
+        }
+        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
+        pub struct EmergencyOp {
+            pub op_type: u8,
+        }
+        impl EmergencyOp {
+            pub const TYPE_ORIGIN_ID: Address = Address::new([
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 11u8,
+            ]);
+        }
+        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
+        pub struct ParsedTokenTransferMessage {
+            pub message_version: u8,
+            pub seq_num: u64,
+            pub source_chain: u8,
+            pub payload: Vec<u8>,
+            pub parsed_payload: crate::bridge::message::TokenTransferPayload,
+        }
+        impl ParsedTokenTransferMessage {
             pub const TYPE_ORIGIN_ID: Address = Address::new([
                 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
                 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
@@ -1391,22 +1442,11 @@ pub mod bridge {
             ]);
         }
         #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct EmergencyOp {
-            pub op_type: u8,
+        pub struct UpdateAssetPrice {
+            pub token_id: u8,
+            pub new_price: u64,
         }
-        impl EmergencyOp {
-            pub const TYPE_ORIGIN_ID: Address = Address::new([
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 11u8,
-            ]);
-        }
-        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct Blocklist {
-            pub blocklist_type: u8,
-            pub validator_eth_addresses: Vec<Vec<u8>>,
-        }
-        impl Blocklist {
+        impl UpdateAssetPrice {
             pub const TYPE_ORIGIN_ID: Address = Address::new([
                 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
                 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
@@ -1426,75 +1466,34 @@ pub mod bridge {
                 0u8, 0u8, 0u8, 11u8,
             ]);
         }
-        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct UpdateAssetPrice {
-            pub token_id: u8,
-            pub new_price: u64,
-        }
-        impl UpdateAssetPrice {
-            pub const TYPE_ORIGIN_ID: Address = Address::new([
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 11u8,
-            ]);
-        }
-        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct AddTokenOnSui {
-            pub native_token: bool,
-            pub token_ids: Vec<u8>,
-            pub token_type_names: Vec<String>,
-            pub token_prices: Vec<u64>,
-        }
-        impl AddTokenOnSui {
-            pub const TYPE_ORIGIN_ID: Address = Address::new([
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 11u8,
-            ]);
-        }
-        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct ParsedTokenTransferMessage {
-            pub message_version: u8,
-            pub seq_num: u64,
-            pub source_chain: u8,
-            pub payload: Vec<u8>,
-            pub parsed_payload: crate::bridge::message::TokenTransferPayload,
-        }
-        impl ParsedTokenTransferMessage {
-            pub const TYPE_ORIGIN_ID: Address = Address::new([
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 11u8,
-            ]);
-        }
-        pub fn extract_token_bridge_payload<'a>(
+        pub fn blocklist_type<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
-        ) -> Arg<crate::bridge::message::TokenTransferPayload> {
+            p0: Ref<'a, crate::bridge::message::Blocklist>,
+        ) -> Arg<u8> {
             let p0 = p0.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("extract_token_bridge_payload").unwrap(),
+                            Identifier::from_str("blocklist_type").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![p0.into()],
                 )
                 .into()
         }
-        pub fn extract_token_bridge_payload_v2<'a>(
+        pub fn blocklist_validator_addresses<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
-        ) -> Arg<crate::bridge::message::TokenTransferPayloadV2> {
+            p0: Ref<'a, crate::bridge::message::Blocklist>,
+        ) -> Ref<'a, Vec<Vec<u8>>> {
             let p0 = p0.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("extract_token_bridge_payload_v2")
+                            Identifier::from_str("blocklist_validator_addresses")
                                 .unwrap(),
                         )
                         .with_type_args(vec![]),
@@ -1502,122 +1501,98 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn to_token_payload_v1<'a>(
+        pub fn create_add_tokens_on_sui_message(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::TokenTransferPayloadV2>,
-        ) -> Arg<crate::bridge::message::TokenTransferPayload> {
+            p0: Arg<u8>,
+            p1: Arg<u64>,
+            p2: Arg<bool>,
+            p3: Arg<Vec<u8>>,
+            p4: Arg<Vec<String>>,
+            p5: Arg<Vec<u64>>,
+        ) -> Arg<crate::bridge::message::BridgeMessage> {
             let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
+            let p3 = p3.resolve_arg(builder);
+            let p4 = p4.resolve_arg(builder);
+            let p5 = p5.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("to_token_payload_v1").unwrap(),
+                            Identifier::from_str("create_add_tokens_on_sui_message")
+                                .unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![p0.into()],
+                    vec![
+                        p0.into(), p1.into(), p2.into(), p3.into(), p4.into(), p5.into()
+                    ],
                 )
                 .into()
         }
-        pub fn extract_emergency_op_payload<'a>(
+        pub fn create_blocklist_message(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
-        ) -> Arg<crate::bridge::message::EmergencyOp> {
+            p0: Arg<u8>,
+            p1: Arg<u64>,
+            p2: Arg<u8>,
+            p3: Arg<Vec<Vec<u8>>>,
+        ) -> Arg<crate::bridge::message::BridgeMessage> {
             let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
+            let p3 = p3.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("extract_emergency_op_payload").unwrap(),
+                            Identifier::from_str("create_blocklist_message").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![p0.into()],
+                    vec![p0.into(), p1.into(), p2.into(), p3.into()],
                 )
                 .into()
         }
-        pub fn extract_blocklist_payload<'a>(
+        pub fn create_emergency_op_message(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
-        ) -> Arg<crate::bridge::message::Blocklist> {
+            p0: Arg<u8>,
+            p1: Arg<u64>,
+            p2: Arg<u8>,
+        ) -> Arg<crate::bridge::message::BridgeMessage> {
             let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("extract_blocklist_payload").unwrap(),
+                            Identifier::from_str("create_emergency_op_message").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![p0.into()],
+                    vec![p0.into(), p1.into(), p2.into()],
                 )
                 .into()
         }
-        pub fn extract_update_bridge_limit<'a>(
+        pub fn create_key(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
-        ) -> Arg<crate::bridge::message::UpdateBridgeLimit> {
+            p0: Arg<u8>,
+            p1: Arg<u8>,
+            p2: Arg<u64>,
+        ) -> Arg<crate::bridge::message::BridgeMessageKey> {
             let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("extract_update_bridge_limit").unwrap(),
+                            Identifier::from_str("create_key").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn extract_update_asset_price<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
-        ) -> Arg<crate::bridge::message::UpdateAssetPrice> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("extract_update_asset_price").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn extract_add_tokens_on_sui<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
-        ) -> Arg<crate::bridge::message::AddTokenOnSui> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("extract_add_tokens_on_sui").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn serialize_message(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Arg<crate::bridge::message::BridgeMessage>,
-        ) -> Arg<Vec<u8>> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("serialize_message").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
+                    vec![p0.into(), p1.into(), p2.into()],
                 )
                 .into()
         }
@@ -1688,33 +1663,12 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn create_emergency_op_message(
+        pub fn create_update_asset_price_message(
             builder: &mut sui_transaction_builder::TransactionBuilder,
             p0: Arg<u8>,
-            p1: Arg<u64>,
-            p2: Arg<u8>,
-        ) -> Arg<crate::bridge::message::BridgeMessage> {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("create_emergency_op_message").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into(), p2.into()],
-                )
-                .into()
-        }
-        pub fn create_blocklist_message(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Arg<u8>,
-            p1: Arg<u64>,
-            p2: Arg<u8>,
-            p3: Arg<Vec<Vec<u8>>>,
+            p1: Arg<u8>,
+            p2: Arg<u64>,
+            p3: Arg<u64>,
         ) -> Arg<crate::bridge::message::BridgeMessage> {
             let p0 = p0.resolve_arg(builder);
             let p1 = p1.resolve_arg(builder);
@@ -1725,7 +1679,8 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("create_blocklist_message").unwrap(),
+                            Identifier::from_str("create_update_asset_price_message")
+                                .unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![p0.into(), p1.into(), p2.into(), p3.into()],
@@ -1756,78 +1711,187 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn create_update_asset_price_message(
+        pub fn emergency_op_pause(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Arg<u8>,
-            p1: Arg<u8>,
-            p2: Arg<u64>,
-            p3: Arg<u64>,
-        ) -> Arg<crate::bridge::message::BridgeMessage> {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            let p3 = p3.resolve_arg(builder);
+        ) -> Arg<u8> {
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("create_update_asset_price_message")
-                                .unwrap(),
+                            Identifier::from_str("emergency_op_pause").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![p0.into(), p1.into(), p2.into(), p3.into()],
+                    vec![],
                 )
                 .into()
         }
-        pub fn create_add_tokens_on_sui_message(
+        pub fn emergency_op_type<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Arg<u8>,
-            p1: Arg<u64>,
-            p2: Arg<bool>,
-            p3: Arg<Vec<u8>>,
-            p4: Arg<Vec<String>>,
-            p5: Arg<Vec<u64>>,
-        ) -> Arg<crate::bridge::message::BridgeMessage> {
+            p0: Ref<'a, crate::bridge::message::EmergencyOp>,
+        ) -> Arg<u8> {
             let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            let p3 = p3.resolve_arg(builder);
-            let p4 = p4.resolve_arg(builder);
-            let p5 = p5.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("create_add_tokens_on_sui_message")
-                                .unwrap(),
+                            Identifier::from_str("emergency_op_type").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![
-                        p0.into(), p1.into(), p2.into(), p3.into(), p4.into(), p5.into()
-                    ],
+                    vec![p0.into()],
                 )
                 .into()
         }
-        pub fn create_key(
+        pub fn emergency_op_unpause(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Arg<u8>,
-            p1: Arg<u8>,
-            p2: Arg<u64>,
-        ) -> Arg<crate::bridge::message::BridgeMessageKey> {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
+        ) -> Arg<u8> {
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("create_key").unwrap(),
+                            Identifier::from_str("emergency_op_unpause").unwrap(),
                         )
                         .with_type_args(vec![]),
-                    vec![p0.into(), p1.into(), p2.into()],
+                    vec![],
+                )
+                .into()
+        }
+        pub fn extract_add_tokens_on_sui<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
+        ) -> Arg<crate::bridge::message::AddTokenOnSui> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("extract_add_tokens_on_sui").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn extract_blocklist_payload<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
+        ) -> Arg<crate::bridge::message::Blocklist> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("extract_blocklist_payload").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn extract_emergency_op_payload<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
+        ) -> Arg<crate::bridge::message::EmergencyOp> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("extract_emergency_op_payload").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn extract_token_bridge_payload<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
+        ) -> Arg<crate::bridge::message::TokenTransferPayload> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("extract_token_bridge_payload").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn extract_token_bridge_payload_v2<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
+        ) -> Arg<crate::bridge::message::TokenTransferPayloadV2> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("extract_token_bridge_payload_v2")
+                                .unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn extract_update_asset_price<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
+        ) -> Arg<crate::bridge::message::UpdateAssetPrice> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("extract_update_asset_price").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn extract_update_bridge_limit<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
+        ) -> Arg<crate::bridge::message::UpdateBridgeLimit> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("extract_update_bridge_limit").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn is_native<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::AddTokenOnSui>,
+        ) -> Arg<bool> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("is_native").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
                 )
                 .into()
         }
@@ -1842,23 +1906,6 @@ pub mod bridge {
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
                             Identifier::from_str("key").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn message_version<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
-        ) -> Arg<u8> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("message_version").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![p0.into()],
@@ -1882,24 +1929,7 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn seq_num<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
-        ) -> Arg<u64> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("seq_num").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn source_chain<'a>(
+        pub fn message_version<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
             p0: Ref<'a, crate::bridge::message::BridgeMessage>,
         ) -> Arg<u8> {
@@ -1909,7 +1939,7 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("source_chain").unwrap(),
+                            Identifier::from_str("message_version").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![p0.into()],
@@ -1933,60 +1963,9 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn token_target_chain<'a>(
+        pub fn peel_u64_be<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::TokenTransferPayload>,
-        ) -> Arg<u8> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("token_target_chain").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn token_target_address<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::TokenTransferPayload>,
-        ) -> Arg<Vec<u8>> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("token_target_address").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn token_type<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::TokenTransferPayload>,
-        ) -> Arg<u8> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("token_type").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn token_amount<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::TokenTransferPayload>,
+            p0: MutRef<'a, crate::sui::bcs::BCS>,
         ) -> Arg<u64> {
             let p0 = p0.resolve_arg(builder);
             builder
@@ -1994,7 +1973,92 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("token_amount").unwrap(),
+                            Identifier::from_str("peel_u64_be").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn required_voting_power<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
+        ) -> Arg<u64> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("required_voting_power").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn reverse_bytes(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Arg<Vec<u8>>,
+        ) -> Arg<Vec<u8>> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("reverse_bytes").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn seq_num<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
+        ) -> Arg<u64> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("seq_num").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn serialize_message(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Arg<crate::bridge::message::BridgeMessage>,
+        ) -> Arg<Vec<u8>> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("serialize_message").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn source_chain<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
+        ) -> Arg<u8> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("source_chain").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![p0.into()],
@@ -2018,51 +2082,17 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn emergency_op_type<'a>(
+        pub fn to_parsed_token_transfer_message<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::EmergencyOp>,
-        ) -> Arg<u8> {
+            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
+        ) -> Arg<crate::bridge::message::ParsedTokenTransferMessage> {
             let p0 = p0.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("emergency_op_type").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn blocklist_type<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::Blocklist>,
-        ) -> Arg<u8> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("blocklist_type").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn blocklist_validator_addresses<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::Blocklist>,
-        ) -> Ref<'a, Vec<Vec<u8>>> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("blocklist_validator_addresses")
+                            Identifier::from_str("to_parsed_token_transfer_message")
                                 .unwrap(),
                         )
                         .with_type_args(vec![]),
@@ -2070,9 +2100,94 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn update_bridge_limit_payload_sending_chain<'a>(
+        pub fn to_token_payload_v1<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::UpdateBridgeLimit>,
+            p0: Ref<'a, crate::bridge::message::TokenTransferPayloadV2>,
+        ) -> Arg<crate::bridge::message::TokenTransferPayload> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("to_token_payload_v1").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn token_amount<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::TokenTransferPayload>,
+        ) -> Arg<u64> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("token_amount").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn token_ids<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::AddTokenOnSui>,
+        ) -> Arg<Vec<u8>> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("token_ids").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn token_prices<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::AddTokenOnSui>,
+        ) -> Arg<Vec<u64>> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("token_prices").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn token_target_address<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::TokenTransferPayload>,
+        ) -> Arg<Vec<u8>> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("token_target_address").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn token_target_chain<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::TokenTransferPayload>,
         ) -> Arg<u8> {
             let p0 = p0.resolve_arg(builder);
             builder
@@ -2080,9 +2195,110 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str(
-                                    "update_bridge_limit_payload_sending_chain",
-                                )
+                            Identifier::from_str("token_target_chain").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn token_transfer_message_version(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+        ) -> Arg<u8> {
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("token_transfer_message_version")
+                                .unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![],
+                )
+                .into()
+        }
+        pub fn token_type<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::TokenTransferPayload>,
+        ) -> Arg<u8> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("token_type").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn token_type_names<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::AddTokenOnSui>,
+        ) -> Arg<Vec<String>> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("token_type_names").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn update_asset_price_payload_new_price<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::UpdateAssetPrice>,
+        ) -> Arg<u64> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("update_asset_price_payload_new_price")
+                                .unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn update_asset_price_payload_token_id<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::UpdateAssetPrice>,
+        ) -> Arg<u8> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("update_asset_price_payload_token_id")
+                                .unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn update_bridge_limit_payload_limit<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::message::UpdateBridgeLimit>,
+        ) -> Arg<u64> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("update_bridge_limit_payload_limit")
                                 .unwrap(),
                         )
                         .with_type_args(vec![]),
@@ -2110,27 +2326,9 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn update_bridge_limit_payload_limit<'a>(
+        pub fn update_bridge_limit_payload_sending_chain<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
             p0: Ref<'a, crate::bridge::message::UpdateBridgeLimit>,
-        ) -> Arg<u64> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("update_bridge_limit_payload_limit")
-                                .unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn update_asset_price_payload_token_id<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::UpdateAssetPrice>,
         ) -> Arg<u8> {
             let p0 = p0.resolve_arg(builder);
             builder
@@ -2138,209 +2336,10 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("update_asset_price_payload_token_id")
+                            Identifier::from_str(
+                                    "update_bridge_limit_payload_sending_chain",
+                                )
                                 .unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn update_asset_price_payload_new_price<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::UpdateAssetPrice>,
-        ) -> Arg<u64> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("update_asset_price_payload_new_price")
-                                .unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn is_native<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::AddTokenOnSui>,
-        ) -> Arg<bool> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("is_native").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn token_ids<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::AddTokenOnSui>,
-        ) -> Arg<Vec<u8>> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("token_ids").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn token_type_names<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::AddTokenOnSui>,
-        ) -> Arg<Vec<String>> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("token_type_names").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn token_prices<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::AddTokenOnSui>,
-        ) -> Arg<Vec<u64>> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("token_prices").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn emergency_op_pause(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-        ) -> Arg<u8> {
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("emergency_op_pause").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![],
-                )
-                .into()
-        }
-        pub fn emergency_op_unpause(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-        ) -> Arg<u8> {
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("emergency_op_unpause").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![],
-                )
-                .into()
-        }
-        pub fn required_voting_power<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
-        ) -> Arg<u64> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("required_voting_power").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn to_parsed_token_transfer_message<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::message::BridgeMessage>,
-        ) -> Arg<crate::bridge::message::ParsedTokenTransferMessage> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("to_parsed_token_transfer_message")
-                                .unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn token_transfer_message_version(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-        ) -> Arg<u8> {
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("token_transfer_message_version")
-                                .unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![],
-                )
-                .into()
-        }
-        pub fn reverse_bytes(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Arg<Vec<u8>>,
-        ) -> Arg<Vec<u8>> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("reverse_bytes").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn peel_u64_be<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::sui::bcs::BCS>,
-        ) -> Arg<u64> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("peel_u64_be").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![p0.into()],
@@ -2359,7 +2358,7 @@ pub mod bridge {
             0u8, 11u8,
         ]);
         pub const MODULE_NAME: &str = "message_types";
-        pub fn token(
+        pub fn add_tokens_on_sui(
             builder: &mut sui_transaction_builder::TransactionBuilder,
         ) -> Arg<u8> {
             builder
@@ -2367,7 +2366,7 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("token").unwrap(),
+                            Identifier::from_str("add_tokens_on_sui").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![],
@@ -2404,7 +2403,7 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn update_bridge_limit(
+        pub fn token(
             builder: &mut sui_transaction_builder::TransactionBuilder,
         ) -> Arg<u8> {
             builder
@@ -2412,7 +2411,7 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("update_bridge_limit").unwrap(),
+                            Identifier::from_str("token").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![],
@@ -2434,7 +2433,7 @@ pub mod bridge {
                 )
                 .into()
         }
-        pub fn add_tokens_on_sui(
+        pub fn update_bridge_limit(
             builder: &mut sui_transaction_builder::TransactionBuilder,
         ) -> Arg<u8> {
             builder
@@ -2442,7 +2441,7 @@ pub mod bridge {
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("add_tokens_on_sui").unwrap(),
+                            Identifier::from_str("update_bridge_limit").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![],
@@ -2462,6 +2461,20 @@ pub mod bridge {
         ]);
         pub const MODULE_NAME: &str = "treasury";
         #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
+        pub struct BridgeTokenMetadata {
+            pub id: u8,
+            pub decimal_multiplier: u64,
+            pub notional_value: u64,
+            pub native_token: bool,
+        }
+        impl BridgeTokenMetadata {
+            pub const TYPE_ORIGIN_ID: Address = Address::new([
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 11u8,
+            ]);
+        }
+        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
         pub struct BridgeTreasury {
             pub treasuries: crate::sui::object_bag::ObjectBag,
             pub supported_tokens: crate::sui::vec_map::VecMap<
@@ -2479,38 +2492,12 @@ pub mod bridge {
             ]);
         }
         #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct BridgeTokenMetadata {
-            pub id: u8,
-            pub decimal_multiplier: u64,
-            pub notional_value: u64,
-            pub native_token: bool,
-        }
-        impl BridgeTokenMetadata {
-            pub const TYPE_ORIGIN_ID: Address = Address::new([
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 11u8,
-            ]);
-        }
-        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
         pub struct ForeignTokenRegistration {
             pub type_name: String,
             pub uc: crate::sui::package::UpgradeCap,
             pub decimal: u8,
         }
         impl ForeignTokenRegistration {
-            pub const TYPE_ORIGIN_ID: Address = Address::new([
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                0u8, 0u8, 0u8, 11u8,
-            ]);
-        }
-        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct UpdateTokenPriceEvent {
-            pub token_id: u8,
-            pub new_price: u64,
-        }
-        impl UpdateTokenPriceEvent {
             pub const TYPE_ORIGIN_ID: Address = Address::new([
                 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
                 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
@@ -2545,20 +2532,72 @@ pub mod bridge {
                 0u8, 0u8, 0u8, 11u8,
             ]);
         }
-        pub fn token_id<'a, T0: MoveType>(
+        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
+        pub struct UpdateTokenPriceEvent {
+            pub token_id: u8,
+            pub new_price: u64,
+        }
+        impl UpdateTokenPriceEvent {
+            pub const TYPE_ORIGIN_ID: Address = Address::new([
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                0u8, 0u8, 0u8, 11u8,
+            ]);
+        }
+        pub fn add_new_token<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::treasury::BridgeTreasury>,
-        ) -> Arg<u8> {
+            p0: MutRef<'a, crate::bridge::treasury::BridgeTreasury>,
+            p1: Arg<String>,
+            p2: Arg<u8>,
+            p3: Arg<bool>,
+            p4: Arg<u64>,
+        ) {
             let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            let p2 = p2.resolve_arg(builder);
+            let p3 = p3.resolve_arg(builder);
+            let p4 = p4.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("token_id").unwrap(),
+                            Identifier::from_str("add_new_token").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into(), p1.into(), p2.into(), p3.into(), p4.into()],
+                );
+        }
+        pub fn burn<'a, T0: MoveType>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::bridge::treasury::BridgeTreasury>,
+            p1: Arg<crate::sui::coin::Coin<T0>>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("burn").unwrap(),
                         )
                         .with_type_args(vec![T0::type_()]),
-                    vec![p0.into()],
+                    vec![p0.into(), p1.into()],
+                );
+        }
+        pub fn create<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+        ) -> Arg<crate::bridge::treasury::BridgeTreasury> {
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("create").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![],
                 )
                 .into()
         }
@@ -2576,6 +2615,42 @@ pub mod bridge {
                         )
                         .with_type_args(vec![T0::type_()]),
                     vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn get_token_metadata<'a, T0: MoveType>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::bridge::treasury::BridgeTreasury>,
+        ) -> Arg<crate::bridge::treasury::BridgeTokenMetadata> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("get_token_metadata").unwrap(),
+                        )
+                        .with_type_args(vec![T0::type_()]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn mint<'a, T0: MoveType>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::bridge::treasury::BridgeTreasury>,
+            p1: Arg<u64>,
+        ) -> Arg<crate::sui::coin::Coin<T0>> {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("mint").unwrap(),
+                        )
+                        .with_type_args(vec![T0::type_()]),
+                    vec![p0.into(), p1.into()],
                 )
                 .into()
         }
@@ -2618,79 +2693,20 @@ pub mod bridge {
                     vec![p0.into(), p1.into(), p2.into(), p3.into()],
                 );
         }
-        pub fn add_new_token<'a>(
+        pub fn token_id<'a, T0: MoveType>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::treasury::BridgeTreasury>,
-            p1: Arg<String>,
-            p2: Arg<u8>,
-            p3: Arg<bool>,
-            p4: Arg<u64>,
-        ) {
+            p0: Ref<'a, crate::bridge::treasury::BridgeTreasury>,
+        ) -> Arg<u8> {
             let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            let p2 = p2.resolve_arg(builder);
-            let p3 = p3.resolve_arg(builder);
-            let p4 = p4.resolve_arg(builder);
             builder
                 .move_call(
                     sui_transaction_builder::Function::new(
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("add_new_token").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into(), p2.into(), p3.into(), p4.into()],
-                );
-        }
-        pub fn create<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-        ) -> Arg<crate::bridge::treasury::BridgeTreasury> {
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("create").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![],
-                )
-                .into()
-        }
-        pub fn burn<'a, T0: MoveType>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::treasury::BridgeTreasury>,
-            p1: Arg<crate::sui::coin::Coin<T0>>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("burn").unwrap(),
+                            Identifier::from_str("token_id").unwrap(),
                         )
                         .with_type_args(vec![T0::type_()]),
-                    vec![p0.into(), p1.into()],
-                );
-        }
-        pub fn mint<'a, T0: MoveType>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::bridge::treasury::BridgeTreasury>,
-            p1: Arg<u64>,
-        ) -> Arg<crate::sui::coin::Coin<T0>> {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("mint").unwrap(),
-                        )
-                        .with_type_args(vec![T0::type_()]),
-                    vec![p0.into(), p1.into()],
+                    vec![p0.into()],
                 )
                 .into()
         }
@@ -2713,23 +2729,6 @@ pub mod bridge {
                         .with_type_args(vec![]),
                     vec![p0.into(), p1.into(), p2.into()],
                 );
-        }
-        pub fn get_token_metadata<'a, T0: MoveType>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::bridge::treasury::BridgeTreasury>,
-        ) -> Arg<crate::bridge::treasury::BridgeTokenMetadata> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("get_token_metadata").unwrap(),
-                        )
-                        .with_type_args(vec![T0::type_()]),
-                    vec![p0.into()],
-                )
-                .into()
         }
     }
 }

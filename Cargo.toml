@@ -11,10 +11,8 @@ members = [
 serde = { version = "1.0.228" }
 
 thiserror = "2.0.17"
-sui-sdk-types = "0.2.2"
-sui-transaction-builder = "0.2.2"
-sui-graphql = { git = "https://github.com/mystenlabs/sui-rust-sdk", rev="c9105cd4028ae4dc5de4c612d25f4d476358a4b2" }
-sui-graphql-macros = { git = "https://github.com/mystenlabs/sui-rust-sdk", rev="c9105cd4028ae4dc5de4c612d25f4d476358a4b2" }
-sui-rpc = "0.2.2"
-move-core-types = { git = "https://github.com/MystenLabs/sui.git", rev = "c7566e601c9a64154850c1cb074a90d7fc11bba4" }
-move-binary-format = { git = "https://github.com/MystenLabs/sui.git", rev = "c7566e601c9a64154850c1cb074a90d7fc11bba4" }
+sui-sdk-types = { git = "https://github.com/mystenlabs/sui-rust-sdk", rev = "d8643443b523fb14873c3ea566a7b7f8146b34e8", features = ["serde"] }
+sui-transaction-builder = { git = "https://github.com/mystenlabs/sui-rust-sdk", rev = "d8643443b523fb14873c3ea566a7b7f8146b34e8" }
+sui-graphql = { git = "https://github.com/mystenlabs/sui-rust-sdk", rev = "d8643443b523fb14873c3ea566a7b7f8146b34e8" }
+sui-graphql-macros = { git = "https://github.com/mystenlabs/sui-rust-sdk", rev = "d8643443b523fb14873c3ea566a7b7f8146b34e8" }
+sui-rpc = { git = "https://github.com/mystenlabs/sui-rust-sdk", rev = "d8643443b523fb14873c3ea566a7b7f8146b34e8" }

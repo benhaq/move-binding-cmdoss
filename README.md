@@ -26,9 +26,8 @@ move-types = { git = "https://github.com/MystenLabs/move-binding" }
 
 ### Import a Move Package from Sui
 ```rust
-use std::str::FromStr;
-use sui_client::Client;
-use sui_sdk_types::{Address, ObjectData};
+use serde_json::json;
+use sui_graphql::Client;
 
 use crate::bridge::bridge::BridgeInner;
 use crate::sui::dynamic_field::Field;
@@ -43,49 +42,56 @@ pub mod models {
     move_contract! {alias = "sui_system", package = "0x3", base_path = crate::models }
 }
 
+#[derive(serde::Deserialize)]
+struct BridgeObject {
+    #[serde(rename = "object.data.contents.bytes")]
+    contents: Option<Vec<u8>>,
+}
+
 #[tokio::main]
 async fn main() {
-    let client = Client::new("https://sui-mainnet.mystenlabs.com/graphql").unwrap();
-    let bridge_obj = client
-        .object(
-            Address::from_str(
-                "0x00ba8458097a879607d609817a05599dc3e9e73ce942f97d4f1262605a8bf0fc".into(),
-            )
-                .unwrap(),
-            None,
+    let client = Client::new("https://graphql.mainnet.sui.io/graphql").unwrap();
+    let response = client
+        .query::<BridgeObject>(
+            r#"
+            query ($id: SuiAddress!) {
+                object(address: $id) {
+                    data {
+                        ... on MoveStruct {
+                            contents { bytes }
+                        }
+                    }
+                }
+            }
+            "#,
+            json!({ "id": "0x00ba8458097a879607d609817a05599dc3e9e73ce942f97d4f1262605a8bf0fc" }),
         )
         .await
-        .unwrap()
         .unwrap();
 
-    if let ObjectData::Struct(o) = bridge_obj.data() {
-        let bridge: Field<u64, BridgeInner> = bcs::from_bytes(o.contents()).unwrap();
+    if let Some(contents) = response.data().and_then(|o| o.contents.as_ref()) {
+        let bridge: Field<u64, BridgeInner> = bcs::from_bytes(contents).unwrap();
         println!("Deserialized Bridge object: {:?}", bridge);
     }
 }
 ```
 
-### Call move functions using sui-client and sui-transaction-builder
+### Call move functions using sui-transaction-builder
 ```rust
 use std::str::FromStr;
-use sui_client::Client;
-use sui_sdk_types::{Address, ObjectId};
-use sui_transaction_builder::TransactionBuilder;
-use sui_transaction_builder::unresolved::Input;
+use sui_sdk_types::{Address, Digest};
+use sui_transaction_builder::{ObjectInput, TransactionBuilder};
 use move_binding_derive::move_contract;
 
 move_contract! {alias = "sui", package = "0x2"}
 
-#[tokio::main]
-async fn main() {
-    let client = Client::new("https://sui-mainnet.mystenlabs.com/graphql").unwrap();
+fn main() {
     let owner = Address::from_str("0x2").unwrap();
-    let gas = ObjectId::from_str("0x726b714a3c4c681d8a9b1ff1833ad368585579a273362e1cbd738c0c8f70dabd").unwrap();
-    let gas = client.object(gas.into(), None).await.unwrap().unwrap();
+    let gas_object_id = Address::from_str("0x726b714a3c4c681d8a9b1ff1833ad368585579a273362e1cbd738c0c8f70dabd").unwrap();
 
     let mut builder = TransactionBuilder::new();
     builder.set_sender(owner);
-    builder.add_gas_objects(vec![Input::owned(gas.object_id(), gas.version(), gas.digest())]);
+    builder.add_gas_objects(vec![ObjectInput::owned(gas_object_id, 1u64, Digest::from([0u8; 32]))]);
     builder.set_gas_budget(10000000);
     builder.set_gas_price(1000);
 
@@ -94,10 +100,8 @@ async fn main() {
     sui::bag::add(&mut builder, new_bag.borrow_mut(), "Test2".into(), "Test_value2".into());
     sui::transfer::public_transfer(&mut builder, new_bag, owner.into());
 
-    let tx = builder.finish().unwrap();
-    let result = client.dry_run_tx(&tx, None).await.unwrap();
-
-    println!("{:?}", result);
+    let tx = builder.try_build().unwrap();
+    println!("{:?}", tx);
 }
 ```
 

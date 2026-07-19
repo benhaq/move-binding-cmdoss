@@ -1,4 +1,5 @@
 pub mod move_codegen;
+pub mod normalized;
 mod package_id_resolver;
 mod package_provider;
 mod types;
