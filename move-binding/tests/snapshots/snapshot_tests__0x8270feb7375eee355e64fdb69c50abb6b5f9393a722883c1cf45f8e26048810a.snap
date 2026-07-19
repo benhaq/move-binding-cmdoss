@@ -1,6 +1,5 @@
 ---
 source: move-binding/tests/snapshot_tests.rs
-assertion_line: 28
 expression: pretty
 ---
 pub mod wal {
@@ -16,17 +15,6 @@ pub mod wal {
             131u8, 193u8, 207u8, 69u8, 248u8, 226u8, 96u8, 72u8, 129u8, 10u8,
         ]);
         pub const MODULE_NAME: &str = "wal";
-        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
-        pub struct WAL {
-            pub dummy_field: bool,
-        }
-        impl WAL {
-            pub const TYPE_ORIGIN_ID: Address = Address::new([
-                130u8, 112u8, 254u8, 183u8, 55u8, 94u8, 238u8, 53u8, 94u8, 100u8, 253u8,
-                182u8, 156u8, 80u8, 171u8, 182u8, 181u8, 249u8, 57u8, 58u8, 114u8, 40u8,
-                131u8, 193u8, 207u8, 69u8, 248u8, 226u8, 96u8, 72u8, 129u8, 10u8,
-            ]);
-        }
         #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct, Key)]
         pub struct ProtectedTreasury {
             pub id: ObjectId,
@@ -49,56 +37,16 @@ pub mod wal {
                 131u8, 193u8, 207u8, 69u8, 248u8, 226u8, 96u8, 72u8, 129u8, 10u8,
             ]);
         }
-        pub fn init<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Arg<crate::wal::wal::WAL>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("init").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                );
+        #[derive(serde::Deserialize, serde::Serialize, Debug, MoveStruct)]
+        pub struct WAL {
+            pub dummy_field: bool,
         }
-        pub fn total_supply<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: Ref<'a, crate::wal::wal::ProtectedTreasury>,
-        ) -> Arg<u64> {
-            let p0 = p0.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("total_supply").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into()],
-                )
-                .into()
-        }
-        pub fn burn<'a>(
-            builder: &mut sui_transaction_builder::TransactionBuilder,
-            p0: MutRef<'a, crate::wal::wal::ProtectedTreasury>,
-            p1: Arg<crate::sui::coin::Coin<crate::wal::wal::WAL>>,
-        ) {
-            let p0 = p0.resolve_arg(builder);
-            let p1 = p1.resolve_arg(builder);
-            builder
-                .move_call(
-                    sui_transaction_builder::Function::new(
-                            PACKAGE_ID,
-                            Identifier::from_str(MODULE_NAME).unwrap(),
-                            Identifier::from_str("burn").unwrap(),
-                        )
-                        .with_type_args(vec![]),
-                    vec![p0.into(), p1.into()],
-                );
+        impl WAL {
+            pub const TYPE_ORIGIN_ID: Address = Address::new([
+                130u8, 112u8, 254u8, 183u8, 55u8, 94u8, 238u8, 53u8, 94u8, 100u8, 253u8,
+                182u8, 156u8, 80u8, 171u8, 182u8, 181u8, 249u8, 57u8, 58u8, 114u8, 40u8,
+                131u8, 193u8, 207u8, 69u8, 248u8, 226u8, 96u8, 72u8, 129u8, 10u8,
+            ]);
         }
         pub fn borrow_cap<'a>(
             builder: &mut sui_transaction_builder::TransactionBuilder,
@@ -128,6 +76,57 @@ pub mod wal {
                             PACKAGE_ID,
                             Identifier::from_str(MODULE_NAME).unwrap(),
                             Identifier::from_str("borrow_cap_mut").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                )
+                .into()
+        }
+        pub fn burn<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: MutRef<'a, crate::wal::wal::ProtectedTreasury>,
+            p1: Arg<crate::sui::coin::Coin<crate::wal::wal::WAL>>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            let p1 = p1.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("burn").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into(), p1.into()],
+                );
+        }
+        pub fn init<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Arg<crate::wal::wal::WAL>,
+        ) {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("init").unwrap(),
+                        )
+                        .with_type_args(vec![]),
+                    vec![p0.into()],
+                );
+        }
+        pub fn total_supply<'a>(
+            builder: &mut sui_transaction_builder::TransactionBuilder,
+            p0: Ref<'a, crate::wal::wal::ProtectedTreasury>,
+        ) -> Arg<u64> {
+            let p0 = p0.resolve_arg(builder);
+            builder
+                .move_call(
+                    sui_transaction_builder::Function::new(
+                            PACKAGE_ID,
+                            Identifier::from_str(MODULE_NAME).unwrap(),
+                            Identifier::from_str("total_supply").unwrap(),
                         )
                         .with_type_args(vec![]),
                     vec![p0.into()],

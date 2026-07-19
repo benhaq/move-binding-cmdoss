@@ -1,20 +1,17 @@
+use crate::normalized::{Enum, Function, Struct, Type};
 use crate::package_provider::{ModuleProvider, MoveModuleProvider};
 use crate::types::ToRustType;
 use crate::SuiNetwork;
 use anyhow::anyhow;
-use indexmap::IndexMap;
 use itertools::Itertools;
-use move_binary_format::normalized::{Enum, Function, Struct, Type};
-use move_core_types::account_address::AccountAddress;
-use move_core_types::identifier::Identifier;
 use once_cell::sync::Lazy;
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
 use std::collections::HashMap;
-use std::rc::Rc;
 use std::sync::RwLock;
+use sui_sdk_types::Address;
 
-pub static BINDING_REGISTRY: Lazy<RwLock<HashMap<AccountAddress, String>>> =
+pub static BINDING_REGISTRY: Lazy<RwLock<HashMap<Address, String>>> =
     Lazy::new(|| RwLock::new(HashMap::new()));
 
 pub struct MoveCodegen;
@@ -39,12 +36,12 @@ impl MoveCodegen {
             .flat_map(|(_, m)| m.values())
             .dedup()
             .for_each(|addr| {
-                cache.insert(addr.clone(), format!("{base_path}::{package_alias}"));
+                cache.insert(*addr, format!("{base_path}::{package_alias}"));
             });
         drop(cache);
 
         let module_tokens = package
-            .module_map
+            .modules
             .iter()
             .map(|(module_name, module)| {
                 let module_ident = Ident::new(module_name, proc_macro2::Span::call_site());
@@ -62,7 +59,7 @@ impl MoveCodegen {
                 Ok::<_, anyhow::Error>(if struct_fun_tokens.is_empty() {
                     quote! {}
                 } else {
-                    let addr_byte_ident = module.id.address.to_vec();
+                    let addr_byte_ident = package.address.as_bytes().to_vec();
                     quote! {
                         pub mod #module_ident{
                             use std::str::FromStr;
@@ -90,22 +87,20 @@ impl MoveCodegen {
     }
 
     fn create_structs(
-        structs: &IndexMap<Identifier, Rc<Struct<Identifier>>>,
-        type_origin_ids: &HashMap<String, AccountAddress>,
+        structs: &[Struct],
+        type_origin_ids: &HashMap<String, Address>,
     ) -> Result<Vec<TokenStream>, anyhow::Error> {
         structs
             .iter()
-            .map(|(name, move_struct)| {
-                Self::create_struct(name.as_str(), move_struct, type_origin_ids)
-            })
+            .map(|move_struct| Self::create_struct(move_struct, type_origin_ids))
             .collect()
     }
 
     fn create_struct(
-        struct_name: &str,
-        move_struct: &Struct<Identifier>,
-        type_origin_id: &HashMap<String, AccountAddress>,
+        move_struct: &Struct,
+        type_origin_id: &HashMap<String, Address>,
     ) -> Result<TokenStream, anyhow::Error> {
+        let struct_name = move_struct.name.as_str();
         let (type_parameters, phantoms) = move_struct.type_parameters.iter().enumerate().fold(
             (vec![], vec![]),
             |(mut type_parameters, mut phantoms), (i, v)| {
@@ -123,14 +118,13 @@ impl MoveCodegen {
             },
         );
 
-        let struct_ident = Ident::new(&struct_name.to_string(), proc_macro2::Span::call_site());
+        let struct_ident = Ident::new(struct_name, proc_macro2::Span::call_site());
         let field_tokens = move_struct
             .fields
-            .0
             .iter()
-            .map(|(field_name, field)| {
+            .map(|field| {
                 let field_ident = Ident::new(
-                    &escape_keyword(field_name.as_str()),
+                    &escape_keyword(field.name.as_str()),
                     proc_macro2::Span::call_site(),
                 );
                 let field_type: syn::Type = syn::parse_str(&field.type_.to_rust_type())?;
@@ -145,11 +139,11 @@ impl MoveCodegen {
             quote! {MoveStruct},
         ];
 
-        if move_struct.abilities.has_key() {
+        if move_struct.has_key_ability {
             derives.push(quote! {Key});
         }
 
-        let addr_byte_ident = type_origin_id[struct_name].to_vec();
+        let addr_byte_ident = type_origin_id[struct_name].as_bytes().to_vec();
         Ok(if type_parameters.is_empty() {
             quote! {
                 #[derive(#(#derives),*)]
@@ -175,20 +169,17 @@ impl MoveCodegen {
     }
 
     fn create_enums(
-        enums: &IndexMap<Identifier, Rc<Enum<Identifier>>>,
-        type_origin_ids: &HashMap<String, AccountAddress>,
+        enums: &[Enum],
+        type_origin_ids: &HashMap<String, Address>,
     ) -> Vec<TokenStream> {
         enums
             .iter()
-            .map(|(name, move_enum)| Self::create_enum(name.as_str(), move_enum, type_origin_ids))
+            .map(|move_enum| Self::create_enum(move_enum, type_origin_ids))
             .collect()
     }
 
-    fn create_enum(
-        enum_name: &str,
-        move_enum: &Enum<Identifier>,
-        type_origin_id: &HashMap<String, AccountAddress>,
-    ) -> TokenStream {
+    fn create_enum(move_enum: &Enum, type_origin_id: &HashMap<String, Address>) -> TokenStream {
+        let enum_name = move_enum.name.as_str();
         let type_parameters: Vec<_> = move_enum
             .type_parameters
             .iter()
@@ -199,28 +190,27 @@ impl MoveCodegen {
             })
             .collect();
 
-        let enum_ident = Ident::new(&enum_name.to_string(), proc_macro2::Span::call_site());
+        let enum_ident = Ident::new(enum_name, proc_macro2::Span::call_site());
         let variant_tokens: Vec<_> = move_enum
             .variants
             .iter()
-            .map(|(variant_name, variant)| {
+            .map(|variant| {
                 let variant_ident = Ident::new(
-                    &escape_keyword(variant_name.as_str()),
+                    &escape_keyword(variant.name.as_str()),
                     proc_macro2::Span::call_site(),
                 );
 
-                if variant.fields.0.is_empty() {
+                if variant.fields.is_empty() {
                     return quote! {#variant_ident,};
                 }
 
                 if variant
                     .fields
-                    .0
                     .iter()
                     .enumerate()
-                    .all(|(i, (field_name, _))| field_name.to_string() == format!("pos{}", i))
+                    .all(|(i, field)| field.name == format!("pos{}", i))
                 {
-                    let field_types = variant.fields.0.iter().map(|(_, field)| {
+                    let field_types = variant.fields.iter().map(|field| {
                         let field_type: syn::Type =
                             syn::parse_str(&field.type_.to_rust_type()).unwrap();
                         quote! {#field_type,}
@@ -231,9 +221,9 @@ impl MoveCodegen {
                     };
                 }
 
-                let field_tokens = variant.fields.0.iter().map(|(field_name, field)| {
+                let field_tokens = variant.fields.iter().map(|field| {
                     let field_ident = Ident::new(
-                        &escape_keyword(field_name.as_str()),
+                        &escape_keyword(field.name.as_str()),
                         proc_macro2::Span::call_site(),
                     );
                     let field_type: syn::Type =
@@ -251,7 +241,7 @@ impl MoveCodegen {
             quote! {MoveStruct},
         ];
 
-        let addr_byte_ident = type_origin_id[enum_name].to_vec();
+        let addr_byte_ident = type_origin_id[enum_name].as_bytes().to_vec();
 
         if type_parameters.is_empty() {
             quote! {
@@ -278,24 +268,24 @@ impl MoveCodegen {
         }
     }
 
-    fn create_funs(funs: &IndexMap<Identifier, Rc<Function<Identifier>>>) -> Vec<TokenStream> {
-        funs.iter()
-            .flat_map(|(name, fun)| Self::create_fun(name.as_str(), fun))
-            .collect()
+    fn create_funs(funs: &[Function]) -> Vec<TokenStream> {
+        funs.iter().flat_map(Self::create_fun).collect()
     }
 
-    fn create_fun(fun_name: &str, fun: &Function<Identifier>) -> Option<TokenStream> {
-        let (param_names, mut params, need_lifetime) = fun.parameters
-            .iter()
-            .enumerate()
-            .fold((vec![], vec![], false), |(mut param_names, mut params, mut lifetime), (i, move_type)| {
+    fn create_fun(fun: &Function) -> Option<TokenStream> {
+        let fun_name = fun.name.as_str();
+        let (param_names, mut params, need_lifetime) = fun.parameters.iter().enumerate().fold(
+            (vec![], vec![], false),
+            |(mut param_names, mut params, mut lifetime), (i, move_type)| {
                 let field_ident = Ident::new(&format!("p{i}"), proc_macro2::Span::call_site());
                 lifetime = lifetime || move_type.is_ref();
-                match &**move_type {
+                match move_type {
                     Type::Reference(_is_mut, r) => {
                         // filter out TxContext
                         if let Type::Datatype(datatype) = &**r {
-                            if datatype.module.address == AccountAddress::TWO && datatype.name.as_str() == "TxContext" {
+                            if datatype.address == Address::TWO
+                                && datatype.name.as_str() == "TxContext"
+                            {
                                 return (param_names, params, lifetime);
                             }
                         }
@@ -306,14 +296,15 @@ impl MoveCodegen {
                 let field_type: syn::Type = syn::parse_str(&move_type.to_arg_type()).unwrap();
                 params.push(quote! {#field_ident: #field_type});
                 (param_names, params, lifetime)
-            });
+            },
+        );
         params.insert(
             0,
             quote! {builder: &mut sui_transaction_builder::TransactionBuilder},
         );
 
         let returns = fun
-            .return_
+            .returns
             .iter()
             .flat_map(|move_type| syn::parse_str::<syn::Type>(&move_type.to_arg_type()).ok())
             .collect::<Vec<_>>();
@@ -324,7 +315,7 @@ impl MoveCodegen {
                 let ident = Ident::new(&format!("T{i}"), proc_macro2::Span::call_site());
                 types.push(ident.clone());
                 let mut abilities = vec![];
-                if v.has_key() {
+                if v.has_key {
                     abilities.push(quote! {move_types::Key});
                 } else {
                     abilities.push(quote! {MoveType});
@@ -334,7 +325,7 @@ impl MoveCodegen {
             },
         );
 
-        if need_lifetime || fun.return_.iter().any(|t| t.is_ref()) {
+        if need_lifetime || fun.returns.iter().any(|t| t.is_ref()) {
             types_with_ability.insert(0, quote! {'a})
         }
 

@@ -80,7 +80,9 @@ pub async fn test_function_call() -> Result<(), Error> {
     let owner = Address::from_str("0x2").unwrap();
 
     // Create a mock gas object with test values
-    let gas_object_id = Address::from_str("0x726b714a3c4c681d8a9b1ff1833ad368585579a273362e1cbd738c0c8f70dabd").unwrap();
+    let gas_object_id =
+        Address::from_str("0x726b714a3c4c681d8a9b1ff1833ad368585579a273362e1cbd738c0c8f70dabd")
+            .unwrap();
     let gas_version = 1u64;
     let gas_digest = sui_sdk_types::Digest::from([0u8; 32]);
 
